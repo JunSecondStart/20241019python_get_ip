@@ -1,0 +1,44 @@
+python -m venv venv
+source venv/bin/activate
+pip --version
+pip install Flask
+flask --version
+
+```
+from flask import Flask, request
+app = Flask(__name__)
+# @app.route('/')
+# def get_ip():
+#     # リクエスト送信元のIPアドレスを取得
+#     user_ip = request.remote_addr
+#     return f"Your IP address is: {user_ip}"
+@app.route('/')
+def get_ip():
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+    return f"Your IP address is: {user_ip}"
+if __name__ == '__main__':
+    app.run()
+```
+
+
+
+flask --app app --debug run
+python3 app.py 
+
+pip --version
+pip install gunicorn
+    app.run() へ、debug=Trueを削除して保存
+gunicorn --workers 3 --bind 0.0.0.0:8000 app:app
+5. デプロイ時のセキュリティとパフォーマンス
+	•	NginxやApacheと連携: GunicornはリバースプロキシとしてNginxやApacheと組み合わせて使うことが推奨されます。これにより、静的ファイルの提供やSSL/TLSの設定を簡単に行えます。
+	•	環境変数の設定: Flaskの設定を本番環境向けに調整するため、FLASK_ENV 環境変数を production に設定しておくことが重要です。開発環境のようなデバッグ情報が出力されることがなくなります。
+まとめ
+Flaskを本番環境で動作させるための標準的な方法として、開発サーバーではなくGunicornのようなWSGIサーバーを使います。以下の手順で本番用に設定できます。
+	1	Gunicornをインストール。
+	2	アプリケーションのエントリーポイントを確認。
+	3	Gunicornを使って起動（例：gunicorn app:app）。
+	4	必要に応じて、ポートやワーカー数などを設定。
+これで、Flaskアプリケーションを本番環境で安全に実行できるようになります。
